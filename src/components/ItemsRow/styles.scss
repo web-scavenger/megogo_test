@@ -1,23 +1,34 @@
+$transition-time: 0.3s;
+
 .items-row__container {
+  margin-top: -360px;
+  margin-left: -640px;
+
   position: absolute;
   width: 100%;
   max-width: 1280px;
   height: 720px;
-  top: 50%;
-  margin-top: -360px;
   left: 50%;
-  margin-left: -640px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 
-  &:first-child {
-    top: -640px;
-    margin-top: 0px;
-  }
+  display: none;
+  visibility: hidden;
+  top: 135%;
+  transition: top $transition-time ease-in;
 
-  &:last-child {
-    top: 920px;
-    margin-top: 0px;
+  &.shown {
+    display: block;
+    visibility: visible;
+
+    &[data-index="0"] {
+      top: -29%;
+    }
+
+    &[data-index="1"] {
+      top: 50%;
+    }
+
+    &[data-index="2"] {
+      top: 127%;
+    }
   }
 }

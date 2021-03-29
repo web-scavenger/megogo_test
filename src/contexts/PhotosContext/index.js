@@ -5,6 +5,7 @@ import {
   ROW_LIMIT,
   INCREASE,
   DECREASE,
+  START,
   HANDLE_SCROLL_DEBOUNCE,
   KEYS_MAP,
   USER_ERROR_MESSAGE,
@@ -19,8 +20,8 @@ export const PhotosContext = createContext(null);
 const PhotosProvider = ({ children }) => {
   const [photosList, setPhotosList] = useState([]); // array that contains all photo data that we get from API
   const [pageData, setPageData] = useState({}); // all other data that API resolve. PageNumber, all Pages at current query, , elements per page
-  const [photosRow, setPhotosRow] = useState({}); // object that contain photo lists at three levels {top: [], middle: [], bottom: []}
-  const [rowData, setRowData] = useState({}); // current active row and last act that we did. { rowNumber : number, act: enum(INCREASE , DECREASE)}
+  const [photosRow, setPhotosRow] = useState([]); // object that contain photo lists at three levels {top: [], middle: [], bottom: []}
+  const [rowData, setRowData] = useState({}); // current active row and last act that we did. { rowNumber : number, act: enum(INCREASE , DECREASE, START)}
   const [currentPhotoPosition, setCurrentPhotoPosition] = useState(); // active Photo/Item position in row
   const [loading, setLoading] = useState(false); // loading state while we waiting for response
   const [error, setError] = useState(null); // error state. show when we have API error
@@ -47,60 +48,29 @@ const PhotosProvider = ({ children }) => {
     const middle = photosList.slice(start, end);
     const bottom = photosList.slice(end, bottomEnd);
 
-    setPhotosRow({
-      top,
-      middle,
-      bottom,
-    });
+    setPhotosRow([top, middle, bottom]);
   };
 
-  const increaseRowCounter = () => {
-    const { end, start, bottomEnd } = countRowsLimits();
-    const { middle, bottom } = photosRow;
+  const increaseRowCounter = async () => {
+    const { rowNumber } = rowData;
+    if (rowNumber !== photosRow.length - 1) return;
 
-    const newTop = middle && middle.length ? middle : [];
-    const newMiddle =
-      bottom && bottom.length ? bottom : photosList.slice(start, end);
+    const { end, bottomEnd } = countRowsLimits();
+
     const newBottom = photosList.slice(end, bottomEnd);
 
-    setPhotosRow({
-      top: newTop,
-      middle: newMiddle,
-      bottom: newBottom,
-    });
-  };
-
-  const decreaseRowCounter = () => {
-    const { rowNumber } = rowData;
-
-    if (rowNumber === 1) return startRowList();
-
-    const { end, start, bottomEnd } = countRowsLimits();
-
-    const { top, middle } = photosRow;
-    const newTop = photosList.slice(start, end);
-    const newMiddle =
-      top && top.length ? top : photosList.slice(end, bottomEnd);
-    const newBottom = middle && middle.length ? middle : [];
-
-    setPhotosRow({
-      top: newTop,
-      middle: newMiddle,
-      bottom: newBottom,
-    });
+    setPhotosRow([...photosRow, newBottom]);
   };
 
   const getImagesRowList = () => {
     const { act } = rowData;
 
-    switch (act) {
-      case INCREASE:
-        return increaseRowCounter();
-      case DECREASE:
-        return decreaseRowCounter();
-      default:
-        return startRowList();
+    if (act === INCREASE) {
+      return increaseRowCounter();
+    } else if( act === START){
+      return startRowList();
     }
+
   };
 
   const getImages = async () => {
@@ -192,18 +162,21 @@ const PhotosProvider = ({ children }) => {
     [loading]
   );
 
-  const handleScroll = useCallback(debounce((e) => {
-    const delta = e.deltaY || e.detail || e.wheelDelta;
+  const handleScroll = useCallback(
+    debounce((e) => {
+      const delta = e.deltaY || e.detail || e.wheelDelta;
 
-    // pause while we wait for response from Flickr API
-    if (!loading) {
-      if (delta > 0) {
-        arrowDown();
-      } else if (delta < 0) {
-        arrowUp();
+      // pause while we wait for response from Flickr API
+      if (!loading) {
+        if (delta > 0) {
+          arrowDown();
+        } else if (delta < 0) {
+          arrowUp();
+        }
       }
-    }
-  }, HANDLE_SCROLL_DEBOUNCE), [loading]);
+    }, HANDLE_SCROLL_DEBOUNCE),
+    [loading]
+  );
 
   useEffect(() => {
     getImages();
@@ -212,7 +185,7 @@ const PhotosProvider = ({ children }) => {
   useEffect(() => {
     if (photosList.length === FIRST_PAGE_PHOTOS_LIMIT - 1) {
       setCurrentPhotoPosition(START_IMAGE_POSTION);
-      setRowData({ rowNumber: 1, act: "" });
+      setRowData({ rowNumber: 1, act: START });
     }
   }, [photosList]);
 
@@ -230,6 +203,7 @@ const PhotosProvider = ({ children }) => {
         handleScroll,
         loading,
         error,
+        rowData,
       }}
     >
       {children}

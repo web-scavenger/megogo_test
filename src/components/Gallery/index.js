@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 
 import { PhotosContext } from "../../contexts";
 import { useEventListener } from "../../hooks";
@@ -9,22 +9,47 @@ import "./styles.scss";
 
 const Gallery = () => {
   const context = useContext(PhotosContext);
-  const { handleKeyPress, handleScroll, photosRow, loading, error } = context;
+  const [shownArr, setShownArr] = useState([0, 1, 2]);
+  const {
+    handleKeyPress,
+    handleScroll,
+    photosRow,
+    loading,
+    error,
+    rowData: { rowNumber, act },
+  } = context;
+
   const scrollEventName = getCurrentBrowserScrollEventName();
 
   useEventListener(scrollEventName, handleScroll);
   useEventListener("keydown", handleKeyPress);
 
+  const getElementsList = useCallback((rowNumber) => {
+    return [rowNumber - 1, rowNumber, rowNumber + 1];
+  }, []);
+
+
+  useEffect(() => {
+    if (!!act) {
+      setShownArr(getElementsList(rowNumber))
+    }
+  }, [act, rowNumber]);
+
   return (
     <>
       <Loader isLoading={loading} />
       <div className="container">
-        {Object.entries(photosRow).map(([level, photos], index) => {
+        {photosRow.map((photos, index) => {
+          const isInclude = shownArr.includes(index)
           return (
             <ItemsRow
               photos={photos}
-              checkForActive={level === "middle"}
+              checkForActive={index === rowNumber}
               key={index}
+              isShown={isInclude}
+              dataIndex={
+                isInclude ? shownArr.indexOf(index) : null
+              }
             />
           );
         })}
