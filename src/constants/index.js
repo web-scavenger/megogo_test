@@ -13,7 +13,7 @@ export const ROW_LIMIT = 5;
 
 export const INCREASE = "INCREASE";
 export const DECREASE = "DECREASE";
-export const START_IMAGE_POSTION = 2; // position of active item on page initialization
+export const START_IMAGE_POSTION = 0; // position of active item on page initialization
 
 export const HANDLE_SCROLL_DEBOUNCE = 150;
 
