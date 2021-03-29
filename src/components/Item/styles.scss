@@ -1,0 +1,22 @@
+@import "../../variables.scss";
+
+.item {
+  width: calc(20% - 12px);
+  height: 100%;
+  margin: 0px 3px;
+  border: 3px solid;
+  border-color: $bg-color;
+  transition: border 0.4s ease-out;
+
+  &:first-child{
+    margin-left: 0px;
+  }
+
+  &:last-child{
+    margin-right: 0px;
+  }
+}
+
+.active {
+  border-color: $primary-color;
+}
