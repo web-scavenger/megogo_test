@@ -28,10 +28,9 @@ const Gallery = () => {
     return [rowNumber - 1, rowNumber, rowNumber + 1];
   }, []);
 
-
   useEffect(() => {
     if (!!act) {
-      setShownArr(getElementsList(rowNumber))
+      setShownArr(getElementsList(rowNumber));
     }
   }, [act, rowNumber]);
 
@@ -40,16 +39,14 @@ const Gallery = () => {
       <Loader isLoading={loading} />
       <div className="container">
         {photosRow.map((photos, index) => {
-          const isInclude = shownArr.includes(index)
+          const isInclude = shownArr.includes(index);
           return (
             <ItemsRow
               photos={photos}
               checkForActive={index === rowNumber}
               key={index}
               isShown={isInclude}
-              dataIndex={
-                isInclude ? shownArr.indexOf(index) : null
-              }
+              dataIndex={isInclude ? shownArr.indexOf(index) : null}
             />
           );
         })}

@@ -41,7 +41,7 @@ const PhotosProvider = ({ children }) => {
     return { end, start, bottomEnd };
   };
 
-  // use this method for initialize list or when we got start of list
+  // use this method for initialize list
   const startRowList = () => {
     const { end, start, bottomEnd } = countRowsLimits();
     const top = [];
@@ -53,6 +53,8 @@ const PhotosProvider = ({ children }) => {
 
   const increaseRowCounter = async () => {
     const { rowNumber } = rowData;
+
+    // don't render if we have enough elements in DOM
     if (rowNumber !== photosRow.length - 1) return;
 
     const { end, bottomEnd } = countRowsLimits();
